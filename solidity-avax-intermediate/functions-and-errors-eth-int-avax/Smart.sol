@@ -26,6 +26,9 @@ contract Smart {
     }
 
     function resetValue() public onlyOwner {
-        num = 0;
+        if ( num == 0) {
+            revert("Value is already zero");
+        }
+         num = 0;
     }
 }
