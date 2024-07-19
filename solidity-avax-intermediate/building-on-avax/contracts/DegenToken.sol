@@ -1,85 +1,66 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "hardhat/console.sol";
 
-contract DegenGamingToken is ERC20, Ownable {
-    // Mapping of category token balances
-    mapping(address => uint256) public sunTokens;
-    mapping(address => uint256) public waterTokens;
-    mapping(address => uint256) public windTokens;
-    mapping(address => uint256) public moonTokens;
+contract DegenToken is ERC20, Ownable ,ERC20Burnable{
+     mapping(uint => uint) public Priceofitem; 
+    bool public _paused;
+    constructor() ERC20("DegenToken", "DGN") Ownable(msg.sender) { 
+         _paused = false;
+         Priceofitem[1] = 100;
+        Priceofitem[2] = 200;
+        Priceofitem[3] = 1000;
+      }
 
-    event Redeem(address indexed from, uint256 value, string category);
-    event Burn(address indexed from, uint256 value);
-    function decimals() public pure override returns (uint8) {
-    return 2; // or any other value you want
+    // Mint new tokens, only the owner can call this function
+    function mint(address to, uint amount) public onlyOwner {
+        _mint(to, amount);
+    }
+    
+      function showRewards() public pure returns (string memory) {
+         string memory ListofRewards = "1: SpiderMan Suit - 100 DG Tokens \n: 2. Captian America Suit - 200 DG Tokens \n: 3. Legendary IronMan Suit- 1000 DG Tokens";
+        
+        return ListofRewards;
+    }
+    function redeemRewards(uint256 _itemprice) public {
+        require(
+            Priceofitem[_itemprice] != 0,
+            "Please select a valid option"
+        );
+        require(
+            balanceOf(msg.sender) >= Priceofitem[_itemprice],
+            "You don't have engouh DG Tokens "
+        );
+        burn(Priceofitem[_itemprice]);
+        
+    }
+
+
+    // Burn tokens that are no longer needed
+    function burnToken(uint amount) public {
+        _burn(msg.sender, amount);
+    }
+
+    // Transfer tokens
+    function transferTokens(address to, uint256 amount) public returns (bool) {
+        _transfer(msg.sender,to, amount);
+        return true;
+    }
+
+    // Check token balance
+    function checkBalance(address account) public view returns (uint) {
+        return balanceOf(account);
+    }
+    function emergencyPause() public onlyOwner {
+    _paused = true;
+    
 }
 
-    constructor(uint256 initialSupply) ERC20("Degen Gaming Token", "DGT") Ownable(msg.sender) {
-        _mint(msg.sender, initialSupply * 10**decimals());
-    }
-
-    function mint(address to, uint256 value) external onlyOwner {
-        require(to!= address(0), "Invalid address");
-        _mint(to, value);
-    }
-
-    function redeemTokens(uint256 value, string memory category) external {
-        require(value <= this.balanceOf(msg.sender), "Insufficient balance");
-        if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("sun"))) {
-            require(sunTokens[msg.sender] >= 2000, "Not enough moon tokens to redeem sun token");
-            sunTokens[msg.sender] -= 2000;
-        } else if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("water"))) {
-            require(waterTokens[msg.sender] >= 1500, "Not enough wind tokens to redeem water token");
-            waterTokens[msg.sender] -= 1500;
-        } else if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("wind"))) {
-            require(windTokens[msg.sender] >= 1000, "Not enough sun tokens to redeem wind token");
-            windTokens[msg.sender] -= 1000;
-        } else if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("moon"))) {
-            require(moonTokens[msg.sender] >= 800, "Not enough water tokens to redeem moon token");
-            moonTokens[msg.sender] -= 800;
-        }
-        _burn(msg.sender, value);
-        emit Redeem(msg.sender, value, category);
-    }
-
-    function playerTransfer(uint256 value, string memory category) public {
-    require(value <= this.balanceOf(msg.sender), "Insufficient balance");
-    if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("sun"))) {
-        sunTokens[msg.sender] += value;
-    } else if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("water"))) {
-        waterTokens[msg.sender] += value;
-    } else if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("wind"))) {
-        windTokens[msg.sender] += value;
-    } else if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("moon"))) {
-        moonTokens[msg.sender] += value;
-    }
-    _transfer(msg.sender, address(this), value);
-    emit Transfer(msg.sender, address(this), value);
-}
-
-    function burn(uint256 value) public {
-        require(value <= this.balanceOf(msg.sender), "Insufficient balance");
-        _burn(msg.sender, value);
-        emit Burn(msg.sender, value);
-    }
-
-    function checkTokenBalance(address account) public view returns (uint256) {
-        return this.balanceOf(account);
-    }
-
-    function checkCategoryBalance(address account, string memory category) public view returns (uint256) {
-        if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("sun"))) {
-            return sunTokens[account];
-        } else if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("water"))) {
-            return waterTokens[account];
-        } else if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("wind"))) {
-            return windTokens[account];
-        } else if (keccak256(abi.encodePacked(category)) == keccak256(abi.encodePacked("moon"))) {
-            return moonTokens[account];
-        }
-        return 0;
-    }
-}
+    function emergencyUnpause() public onlyOwner {
+    _paused = false;
+    
+}   }
