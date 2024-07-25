@@ -1,20 +1,10 @@
-# Smart Contract Overview
+# Decentralised Voting System
 
-This repository contains a simple Solidity smart contract named `Smart` that manages a single unsigned integer (`num`) and includes access control functionalities.
+This contract is written on Solidity and has very basic functionalities related to the creation of decentralised Voting System.
 
 ## Description
 
-The `Smart` contract is designed to demonstrate basic Solidity functionalities including state variables, access control using modifiers, input validation, and internal consistency checks.
-
-- **State Variables**:
-
-  - `owner`: Stores the address of the contract deployer who has special privileges.
-  - `num`: Stores an unsigned integer that can be modified under certain conditions.
-
-- **Functions**:
-  - `setValue(uint256 _num)`: Allows setting the value of `num` with a requirement that `_num` must be greater than 0.
-  - `multiplyValue()`: Multiplies the current value of `num` by 2 and asserts that `num` remains greater than 0 to prevent overflow.
-  - `resetValue()`: Resets the value of `num` to 0, restricted to the contract owner using an `onlyOwner` modifier.
+This Smart Contract consists of simple functions and variables which helps in mapping of the data along with its minting and also helps us to burn the resources whenever needed.
 
 ## Usage
 
@@ -26,7 +16,7 @@ Use a Remix IDE to compile and deploy the Smart.sol file.
 **2. Interact with the Contract:**
 
 - Use tools like Remix IDE to interact with the deployed contract.
-- Test each function (setValue, multiplyValue, resetValue) to observe their behavior.
+- Test each function to observe their behavior.
 
 ## Authors
 
